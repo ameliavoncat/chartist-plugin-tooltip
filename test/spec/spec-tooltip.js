@@ -56,9 +56,12 @@ describe('ctPointLabels', function () {
     expect(hasClass(getTooltip(), 'tooltip-show')).toBe(false);
   });
 
-  it('should show tooltip on mouse enter', function() {
+  it('should show tooltip on mouse enter', function(done) {
     listeners['mouseover'](event);
-    expect(hasClass(getTooltip(), 'tooltip-show')).toBe(true);
+    setTimeout(function() {
+      expect(hasClass(getTooltip(), 'tooltip-show')).toBe(true);
+      done();
+    }, 500)
   });
 
   it('should hide tooltip on mouse leave', function() {
@@ -72,14 +75,17 @@ describe('ctPointLabels', function () {
     expect(getTooltip().innerHTML).toContain('42');
   });
 
-  it('should set tooltip position', function() {
+  it('should set tooltip position', function(done) {
     event.pageX = 100;
     event.pageY = 200;
     listeners['mousemove'](event);
-    expect(getTooltip().style.left).toMatch(/^\d+px$/);
-    expect(getTooltip().style.top).toMatch(/^\d+px$/);
+    setTimeout(function() {
+      expect(getTooltip().style.left).toMatch(/^\d+px$/);
+      expect(getTooltip().style.top).toMatch(/^\d+px$/);
+      done();
+    }, 500)
   });
-  
+
   it('should set additional class', function(){
     expect(hasClass(getTooltip(), 'foo')).toBe(true);
   });
