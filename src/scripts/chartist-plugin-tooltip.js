@@ -24,6 +24,7 @@
     options = Chartist.extend({}, defaultOptions, options);
 
     return function tooltip(chart) {
+      console.log('inside tooltip(chart)')
       var tooltipSelector = options.pointClass;
       if (chart.constructor instanceof Chartist.Bar) {
         tooltipSelector = 'ct-bar';
@@ -49,6 +50,9 @@
       }
       var height = $toolTip.offsetHeight;
       var width = $toolTip.offsetWidth;
+
+      console.log('height', height)
+      console.log('width', width)
 
       hide($toolTip);
 
@@ -112,8 +116,7 @@
 
         if(tooltipText) {
           $toolTip.innerHTML = tooltipText;
-          setPosition(event);
-          show($toolTip);
+          setPosition(event, show);
 
           // Remember height and width to avoid wrong position in IE
           height = $toolTip.offsetHeight;
@@ -130,29 +133,55 @@
         setPosition(event);
       });
 
-      function setPosition(event) {
-        height = height || $toolTip.offsetHeight;
-        width = width || $toolTip.offsetWidth;
-        var offsetX = - width / 2 + options.tooltipOffset.x
-        var offsetY = - height + options.tooltipOffset.y;
-        var anchorX, anchorY;
+      function setPosition(event, cb) {
+        console.log('in setPosition')
+        function _setValues() {
+          height = $toolTip.offsetHeight;
+          width = $toolTip.offsetWidth;
 
-        if (!options.appendToBody) {
-          var box = $chart.getBoundingClientRect();
-          var left = event.pageX - box.left - window.pageXOffset ;
-          var top = event.pageY - box.top - window.pageYOffset ;
+          console.log('height', height)
+          console.log('width', width)
+          var offsetX = - width / 2 + options.tooltipOffset.x
+          var offsetY = - height + options.tooltipOffset.y;
 
-          if (true === options.anchorToPoint && event.target.x2 && event.target.y2) {
-            anchorX = parseInt(event.target.x2.baseVal.value);
-            anchorY = parseInt(event.target.y2.baseVal.value);
+          console.log('options', options)
+          console.log('offsetX', offsetX)
+          console.log('offsetY', offsetY)
+
+          var anchorX, anchorY;
+
+          if (!options.appendToBody) {
+            var box = $chart.getBoundingClientRect();
+            var left = event.pageX - box.left - window.pageXOffset ;
+            var top = event.pageY - box.top - window.pageYOffset ;
+            console.log('event', event)
+            console.log('box', box)
+            console.log('window.pageXOffset', window.pageXOffset)
+            console.log('windo.pageYOffset', window.pageYOffset)
+
+            console.log('left', left)
+            console.log('top', top)
+
+            if (true === options.anchorToPoint && event.target.x2 && event.target.y2) {
+              anchorX = parseInt(event.target.x2.baseVal.value);
+              anchorY = parseInt(event.target.y2.baseVal.value);
+
+              console.log('anchorX', anchorX)
+              console.log('anchorY', anchorY)
+            }
+
+            $toolTip.style.top = (anchorY || top) + offsetY + 'px';
+            $toolTip.style.left = (anchorX || left) + offsetX + 'px';
+          } else {
+            $toolTip.style.top = event.pageY + offsetY + 'px';
+            $toolTip.style.left = event.pageX + offsetX + 'px';
           }
-
-          $toolTip.style.top = (anchorY || top) + offsetY + 'px';
-          $toolTip.style.left = (anchorX || left) + offsetX + 'px';
-        } else {
-          $toolTip.style.top = event.pageY + offsetY + 'px';
-          $toolTip.style.left = event.pageX + offsetX + 'px';
+          cb($toolTip);
         }
+
+        // read latest $toolTip values before calculating values
+        $toolTip = $chart.querySelector('.chartist-tooltip');
+        setTimeout(_setValues, 200)
       }
     }
   };
